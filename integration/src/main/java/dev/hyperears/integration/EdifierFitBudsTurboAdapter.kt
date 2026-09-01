@@ -26,10 +26,13 @@ class EdifierFitBudsTurboAdapter : EdifierEarbudAdapter() {
     override val resolution: AdapterResolution = AdapterResolution.EXACT_MATCH
 
     override val miLinkCardPresentationId: MiLinkCardPresentationId?
-        get() = EdifierMiLinkPresentationIds.FOUR_MODE.takeIf {
-            // FitBuds Turbo is an ANC model: prefer the four-mode card (ANC/off/transparency/wind)
-            // over the game-mode card once wind-noise control is protocol-confirmed.
-            effectiveCapabilities().windNoiseControl
+        get() = EdifierMiLinkPresentationIds.FITBUDS_TURBO.takeIf {
+            // FitBuds Turbo is an ANC model with a 45 ms game mode. The dedicated card shows the
+            // ANC four modes (ANC/off/transparency/wind) plus a game-mode switch. It is exposed
+            // once the ANC dialect is protocol-confirmed (wind-noise control implies the four-mode
+            // family) and the game-mode feature has been observed on the wire.
+            effectiveCapabilities().windNoiseControl &&
+                runtimeState().features.get<EdifierGameModeFeatureState>() != null
         }
 
     override val featureStateContract: DeviceFeatureStateContract =
