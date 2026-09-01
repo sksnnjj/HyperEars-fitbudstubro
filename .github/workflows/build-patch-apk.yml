@@ -46,6 +46,9 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
+      - name: Fix Gradle wrapper executable bit
+        run: chmod +x gradlew
+
       - name: Run verification (unit tests + lint + assembleDebug)
         run: >-
           ./gradlew --no-daemon
