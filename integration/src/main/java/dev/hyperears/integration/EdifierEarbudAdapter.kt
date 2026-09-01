@@ -314,6 +314,17 @@ data class EdifierWireConfig(
     ),
     val preferredAncIndex: Int? = null,
     val gameModeQuery: Boolean = false,
+    /**
+     * When true the device answers the Edifier BES protocol with **plaintext** response
+     * payloads (no XOR 0xA5 obfuscation) and expects plaintext set commands.
+     *
+     * Most Edifier headsets (W860NB PRO, Evo Pro, FitClip Ultra) XOR their response payloads with
+     * [EdifierWireCodec.RESPONSE_XOR_KEY] and require set commands to be XOR-obfuscated the same
+     * way. FitBuds Turbo is an exception: its query responses are plaintext and its set commands
+     * are accepted without the XOR transform. Confirmed on-device (2026-09-01) by the ANC query
+     * returning `1B 06` verbatim (EVO_PRO ANC slot + OFF value) which the XOR decode mangles.
+     */
+    val plaintextPayloads: Boolean = false,
 ) {
     init {
         require(batteryQueries.isNotEmpty())
@@ -337,6 +348,9 @@ private class EdifierProtocolSession(
     private var handshakePublished = false
     private var activeAncDialect: EdifierAncDialect? =
         configuration.preferredAncIndex?.let(configuration::dialect)
+
+    /** True when this device requires the XOR 0xA5 obfuscation on responses and set commands. */
+    private val encryptPayloads: Boolean get() = !configuration.plaintextPayloads
 
     override fun initialReadCommands(): List<ByteArray> = buildList {
         addAll(configuration.batteryQueries.map { batteryQueryPacket(it) })
@@ -363,13 +377,19 @@ private class EdifierProtocolSession(
             val dialect = activeAncDialect
             val ancValue = dialect?.writeValues?.get(request.mode)
             if (ancValue != null) {
-                listOf(EdifierWireCodec.setAnc(ancValue = ancValue, ancIndex = dialect.index))
+                listOf(
+                    EdifierWireCodec.setAnc(
+                        ancValue = ancValue,
+                        ancIndex = dialect.index,
+                        encrypt = encryptPayloads,
+                    ),
+                )
             } else {
                 emptyList()
             }
         }
         request is EdifierControlRequest.SetGameMode ->
-            listOf(EdifierWireCodec.setGameMode(request.enabled))
+            listOf(EdifierWireCodec.setGameMode(request.enabled, encrypt = encryptPayloads))
 
         else -> emptyList()
     }
@@ -399,7 +419,7 @@ private class EdifierProtocolSession(
             val acceptsBatteryCommand = configuration.batteryQueries.any {
                 it.commandIndex == frame.commandIndex
             }
-            EdifierWireCodec.parseBatteryState(frame)
+            EdifierWireCodec.parseBatteryState(frame, encrypted = encryptPayloads)
                 ?.takeIf { acceptsBatteryCommand }
                 ?.let { battery ->
                     add(ProtocolEvent.CapabilitiesIdentified(battery = true))
@@ -412,7 +432,7 @@ private class EdifierProtocolSession(
                     return@forEach
                 }
 
-            EdifierWireCodec.parseAncState(frame)?.let { anc ->
+            EdifierWireCodec.parseAncState(frame, encrypted = encryptPayloads)?.let { anc ->
                 val dialect = configuration.dialect(anc.mode) ?: return@let
                 activeAncDialect = dialect
                 val mode = anc.level?.let(dialect.readValues::get)
@@ -441,7 +461,7 @@ private class EdifierProtocolSession(
             }
 
             // Game-mode state from 0x08 query or 0x09 set response
-            EdifierWireCodec.parseGameModeState(frame)?.let { enabled ->
+            EdifierWireCodec.parseGameModeState(frame, encrypted = encryptPayloads)?.let { enabled ->
                 add(
                     ProtocolEvent.FeatureStateChanged(
                         EdifierGameModeFeatureState(enabled),
