@@ -524,35 +524,33 @@ internal object EdifierFitBudsTurboMiLinkCardAdapter : MiLinkCardAdapter {
         ORIGINAL("original"),
         SELECT_CARD("select-card"),
     }
-
-    private companion object {
-        const val COMPONENT = "MiLinkUi"
-        const val ORIGINAL_ANC_CARD_TITLE_ID = "anc_card_title"
-        const val ORIGINAL_ANC_CARD_ID = "anc_card"
-        const val ORIGINAL_ANC_TRANSPARENCY_ID = "anc_clear"
-        const val ORIGINAL_ANC_NOISE_CANCELLATION_ID = "anc_noise_cancel"
-        const val ORIGINAL_ANC_OFF_ID = "anc_off"
-        const val ORIGINAL_ANC_ITEM_TITLE_ID = "anc_title"
-        const val ORIGINAL_ANC_ITEM_CLASS =
-            "com.miui.circulate.world.headset.ui.HeadsetControlAncItemView"
-        const val SELECT_ANC_CARD_TITLE_ID = "anc_card_text"
-        const val SELECT_ANC_CARD_ID = "anc_select_card"
-        const val SELECT_ANC_CARD_CLASS =
-            "com.miui.circulate.world.headset.ui.HeadsetSelectCardView"
-        const val SELECT_ANC_ITEM_CLASS =
-            "com.miui.circulate.world.headset.ui.HeadsetSelectItemView"
-        const val NATIVE_MODE_COUNT = 3
-        const val MIUIX_SLIDING_BUTTON = "miuix.slidingwidget.widget.SlidingButton"
-        const val WIND_LABEL = "抗风噪"
-        const val GAME_MODE_LABEL = "游戏模式"
-        const val LABEL_END_PADDING_DP = 8
-        const val GAME_LABEL_START_PADDING_DP = 16
-        const val EMBEDDED_HEADER_HEIGHT_DP = 48
-        const val EMBEDDED_HEADER_HORIZONTAL_PADDING_DP = 20
-        const val ENABLED_ALPHA = 1.0f
-        const val DISABLED_ALPHA = 0.45f
-    }
 }
+
+private const val COMPONENT = "MiLinkUi"
+private const val ORIGINAL_ANC_CARD_TITLE_ID = "anc_card_title"
+private const val ORIGINAL_ANC_CARD_ID = "anc_card"
+private const val ORIGINAL_ANC_TRANSPARENCY_ID = "anc_clear"
+private const val ORIGINAL_ANC_NOISE_CANCELLATION_ID = "anc_noise_cancel"
+private const val ORIGINAL_ANC_OFF_ID = "anc_off"
+private const val ORIGINAL_ANC_ITEM_TITLE_ID = "anc_title"
+private const val ORIGINAL_ANC_ITEM_CLASS =
+    "com.miui.circulate.world.headset.ui.HeadsetControlAncItemView"
+private const val SELECT_ANC_CARD_TITLE_ID = "anc_card_text"
+private const val SELECT_ANC_CARD_ID = "anc_select_card"
+private const val SELECT_ANC_CARD_CLASS =
+    "com.miui.circulate.world.headset.ui.HeadsetSelectCardView"
+private const val SELECT_ANC_ITEM_CLASS =
+    "com.miui.circulate.world.headset.ui.HeadsetSelectItemView"
+private const val NATIVE_MODE_COUNT = 3
+private const val MIUIX_SLIDING_BUTTON = "miuix.slidingwidget.widget.SlidingButton"
+private const val WIND_LABEL = "抗风噪"
+private const val GAME_MODE_LABEL = "游戏模式"
+private const val LABEL_END_PADDING_DP = 8
+private const val GAME_LABEL_START_PADDING_DP = 16
+private const val EMBEDDED_HEADER_HEIGHT_DP = 48
+private const val EMBEDDED_HEADER_HORIZONTAL_PADDING_DP = 20
+private const val ENABLED_ALPHA = 1.0f
+private const val DISABLED_ALPHA = 0.45f
 
 /**
  * Pure game-mode toggle policy for the FitBuds Turbo card; UI code contains no independent state.
