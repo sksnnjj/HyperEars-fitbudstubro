@@ -236,6 +236,14 @@ class EdifierFitClipUltraAdapter : EdifierEarbudAdapter() {
 object EdifierMiLinkPresentationIds {
     val FOUR_MODE = MiLinkCardPresentationId("edifier-four-mode")
     val GAME_MODE = MiLinkCardPresentationId("edifier-fitclip-game")
+
+    /**
+     * FitBuds Turbo-specific card: the ANC four-mode card (transparency / ANC / off / wind)
+     * plus a game-mode switch beside the native title. Kept as its own ID so the Turbo adapter
+     * does not share the generic four-mode card and can expose both wind-noise and low-latency
+     * game control on a single MiLink card.
+     */
+    val FITBUDS_TURBO = MiLinkCardPresentationId("edifier-fitbuds-turbo")
 }
 
 enum class EdifierBatteryQuery(val commandIndex: Int) {
