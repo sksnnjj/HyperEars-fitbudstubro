@@ -127,11 +127,11 @@ class EdifierWireCodecTest {
         assertEquals(6, plain.level)
     }
 
-    /** FitBuds Turbo F2 battery response is PLAINTEXT: 03 64 64 00 03 -> L/R 100%. */
+    /** FitBuds Turbo F2 battery response is PLAINTEXT: 03 64 64 00 03 11 -> L/R 100%. */
     @Test
     fun `parse plaintext F2 response gives independent ear batteries`() {
         val frame = EdifierWireCodec.Decoder().offer(
-            hex("BB EC F2 00 06 03 64 64 00 03 11"),
+            hex("BB EC F2 00 06 03 64 64 00 03 11 7E"),
         ).single()
 
         val plain = requireNotNull(EdifierWireCodec.parseBatteryState(frame, encrypted = false))
