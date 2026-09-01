@@ -54,6 +54,9 @@ class EdifierFitBudsTurboAdapter : EdifierEarbudAdapter() {
         ),
         // 45 ms low-latency mode: probe the BES game-mode family command.
         gameModeQuery = true,
+        // FitBuds Turbo answers the private protocol with PLAINTEXT payloads (no XOR 0xA5) and
+        // accepts plaintext set commands. Confirmed on-device: ANC query returns `1B 06` verbatim.
+        plaintextPayloads = true,
     )
 
     override fun controlPolicy(request: ControlRequest): ControlExecutionPolicy =
