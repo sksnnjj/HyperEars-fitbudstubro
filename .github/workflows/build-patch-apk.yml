@@ -1,0 +1,101 @@
+name: Build patch APK
+
+# Manually-triggered workflow that compiles the project (with any local patch, e.g.
+# EdifierFitBudsTurboAdapter) into a DEBUG-signed APK and uploads it as an artifact.
+# Debug signing needs no keystore secrets, so it works on a fork without any repo Secrets.
+#
+# Why not the project's own `ci.yml`? That workflow compiles but does NOT upload the APK.
+# Why not `signed-build.yml`? It requires the RELEASE_KEYSTORE_* Secrets that only the
+# upstream owner has. This workflow fills the gap for local-patch validation on a fork.
+#
+# Usage:
+#   1. Fork this repo.
+#   2. Push your patch (adapter + registration + this workflow) to your fork.
+#   3. GitHub -> Actions -> "Build patch APK" -> "Run workflow" (on your default branch).
+#   4. Download the uploaded artifact and install the APK on the phone.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-patch-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Test, lint and build debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5.7.0
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Run verification (unit tests + lint + assembleDebug)
+        run: >-
+          ./gradlew --no-daemon
+          testDebugUnitTest
+          :system-module:lintDebug
+          :system-module:assembleDebug
+
+      - name: Prepare artifact
+        id: artifact
+        shell: bash
+        run: |
+          source_apk="system-module/build/outputs/apk/debug/system-module-debug.apk"
+          test -f "$source_apk"
+          version_name="$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' system-module/build.gradle.kts | head -n 1)"
+          test -n "$version_name"
+          short_sha="$(git rev-parse --short=8 HEAD)"
+          apk_name="HyperEars-v${version_name}-${short_sha}-patch-debug.apk"
+          artifact_name="HyperEars-v${version_name}-${short_sha}-patch-debug"
+          cp "$source_apk" "$apk_name"
+          sha256sum "$apk_name" > "$apk_name.sha256"
+          echo "apk_name=$apk_name" >> "$GITHUB_OUTPUT"
+          echo "artifact_name=$artifact_name" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Patch debug build"
+            echo
+            echo "- Source: \`$(git rev-parse HEAD)\`"
+            echo "- Version: \`$version_name\`"
+            echo "- APK: \`$apk_name\`"
+            echo "- SHA-256: \`$(sha256sum "$apk_name" | cut -d' ' -f1)\`"
+            echo "- Signature: Android debug keystore (for on-device validation, not for release)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.artifact.outputs.artifact_name }}
+          path: |
+            ${{ steps.artifact.outputs.apk_name }}
+            ${{ steps.artifact.outputs.apk_name }}.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+      - name: Upload reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: verification-reports
+          path: |
+            **/build/reports/**
+            **/build/test-results/**
+          if-no-files-found: ignore
+          retention-days: 7
