@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <queries>
+        <package android:name="com.android.bluetooth" />
+        <package android:name="com.milink.service" />
+        <package android:name="com.vivo.vivotws" />
+        <package android:name="com.heytap.headset" />
+        <package android:name="com.oplus.melody" />
+        <package android:name="com.coloros.oppopods" />
+        <package android:name="com.bose.bosemusic" />
+        <package android:name="com.bose.monet" />
+        <package android:name="com.edifier.edifierconnect" />
+        <package android:name="cn.ikaile.ruoshui.client" />
+        <package android:name="cn.lightyeartech.android" />
+        <package android:name="com.yuandao.nicehck" />
+        <package android:name="com.sony.songpal.mdr" />
+        <package android:name="com.qcymall.googleearphonesetup" />
+        <package android:name="com.panasonic.technicsaudioconnect" />
+        <package android:name="com.huawei.smartaudio" />
+    </queries>
+
+    <application
+        android:name=".HyperEarsApplication"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.HyperEars">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposeddescription"
+            android:value="@string/xposed_description" />
+        <meta-data
+            android:name="xposedminversion"
+            android:value="101" />
+        <meta-data
+            android:name="xposedscope"
+            android:resource="@array/xposed_scope" />
+    </application>
+</manifest>
